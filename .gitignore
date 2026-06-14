@@ -1,0 +1,16 @@
+__pycache__/
+*.pth
+*.pt
+*.weights
+datasets/
+data/
+runs/
+logs/
+output/
+outputs/
+dataset/
+.DS_Store
+.vscode/
+pycocoeval*/
+VideoActivationCode.txt
+VideoBaiduYun.txt

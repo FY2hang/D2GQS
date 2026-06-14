@@ -1,0 +1,62 @@
+  __include__: [
+    '/home/featurize/zfy/DEIM/configs/dataset/pl_detection_test.yml',
+    '../runtime.yml',
+    '../base/dataloader_dfine.yml',
+    '../base/optimizer.yml',
+    '../base/dfine_hgnetv2.yml',
+  ]
+
+  output_dir: ./outputs/dfine_hgnetv2_l_test
+
+
+  HGNetv2:
+    name: 'B4'
+    return_idx: [0, 1, 2, 3]
+    freeze_stem_only: True
+    freeze_at: 0
+    freeze_norm: True
+
+  DFINETransformer:
+    num_layers: 6  # 4 5 6
+    eval_idx: -1  # -2 -3 -4
+    feat_channels: [256, 256, 256, 256]
+    feat_strides: [4, 8, 16, 32]
+    num_points: [4, 4, 4, 4] # [4, 4, 4] [3, 6, 3]
+    num_levels: 4
+
+
+  HybridEncoder:
+    in_channels: [128, 512, 1024, 2048]
+    feat_strides: [4, 8, 16, 32]
+    hidden_dim: 256
+    depth_mult: 1
+    expansion: 1
+
+  optimizer:
+    type: AdamW
+    params:
+      -
+        params: '^(?=.*backbone)(?!.*norm|bn).*$'
+        lr: 0.0000125
+      -
+        params: '^(?=.*(?:encoder|decoder))(?=.*(?:norm|bn)).*$'
+        weight_decay: 0.
+
+    lr: 0.00025
+    betas: [0.9, 0.999]
+    weight_decay: 0.000125
+
+
+  # Increase to search for the optimal ema
+  epoches: 300 # 72 + 2n
+  train_dataloader:
+    dataset:
+      transforms:
+        policy:
+          epoch: 240
+    collate_fn:
+      stop_epoch: 240
+      ema_restart_decay: 0.9999
+      base_size_repeat: 4
+  val_dataloader:
+    total_batch_size: 4
